@@ -1,10 +1,12 @@
 # get_transcript.py
 
-import keyring, pyotp
+import keyring, pyotp, time
 from pathlib import Path
 from playwright.sync_api import sync_playwright
+from datetime import datetime
 
-OUT = Path.home() / "Downloads" / "jjay_transcript.pdf"
+stamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+OUT = Path.home() / "Downloads" / f"cuny_transcript_{stamp}.pdf"
 
 user = keyring.get_password("cuny", "username")
 pw = keyring.get_password("cuny", "password")
@@ -12,7 +14,7 @@ totp = pyotp.TOTP(keyring.get_password("cuny", "totp_secret"))
 
 with sync_playwright() as p:
     browser = p.chromium.launch(headless=False)
-    ctx = p.chromium.launch_persistent_context(accept_downloads=True)
+    ctx = browser.new_context(accept_downloads=True)
     page = ctx.new_page()
     page.goto("https://home.cunyfirst.cuny.edu")
 
@@ -22,28 +24,33 @@ with sync_playwright() as p:
         page.get_by_role("textbox", name="Password").fill(pw)       # password
         page.get_by_role("button", name="Log in").click()           # submit
 
+        # avoid submitting a code that's about to expire
+        if totp.interval - (time.time() % totp.interval) < 3:
+            time.sleep(4)
+
         # redirection to TOTP
         page.get_by_role("textbox", name="Enter TOTP from the").fill(totp.now())
         page.get_by_role("button", name="Verify").click()
 
-        page.fill("input[name=otc]", totp.now())  # selector may differ
-        page.click("input[type=submit]")
-        # "Stay signed in?" prompt: say yes so the session persists
-        try:
-            page.click("input[type=submit]", timeout=5000)
-        except Exception:
-            pass
+    # Student Center -> Academics -> View Unofficial Transcript
+    page.get_by_role("link", name="Student Center").click()
+    page.get_by_role("link", name="Graduation and Transcript").click()
+    page.get_by_role("link", name="John Jay College of Criminal").click()
 
-    # --- Navigate: Student Center -> Academics -> View Unofficial Transcript ---
-    # Use `playwright codegen` to record the exact clicks (see below)
+    # Submit transcript request triggers new window popup
+    with page.expect_popup() as page1_info:
+        page.get_by_role("button", name="Submit").click()
+    page1 = page1_info.value
+    page1.wait_for_load_state()
 
-    # --- Capture the PDF ---
-    with page.expect_popup() as popup_info:
-        pass  # replace with the click that triggers "Go" on the transcript request
-    popup = popup_info.value
-    popup.wait_for_load_state()
-    # Either it triggers a download, or it opens a PDF viewer URL:
-    pdf = ctx.request.get(popup.url)
-    OUT.write_bytes(pdf.body())
+    # DEBUG HERE
+    # Clicks dowload button
+    with page1.expect_download() as download_info:
+        page1.locator("html > body > iframe").last.content_frame.get_by_role("button", name="Download").click()
+
+    # Downlaods pdf
+    download_info.value.save_as(OUT)
     print(f"Saved to {OUT}")
+
     ctx.close()
+    browser.close()
