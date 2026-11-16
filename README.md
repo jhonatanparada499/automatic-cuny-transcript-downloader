@@ -30,3 +30,6 @@ with page1.expect_download() as download1_info:
 download1 = download1_info.value
 page1.locator("html > body > iframe").last.content_frame.get_by_role("button", name="Download").click()
 page1.locator("html > body > iframe").last.content_frame.get_by_role("button", name="Download").press("Escape")
+
+## Future features
+- Add docker container for app
