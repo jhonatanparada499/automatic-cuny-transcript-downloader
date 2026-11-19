@@ -12,6 +12,8 @@ user = keyring.get_password("cuny", "username")
 pw = keyring.get_password("cuny", "password")
 totp = pyotp.TOTP(keyring.get_password("cuny", "totp_secret"))
 
+college = "John Jay College of Criminal"
+
 with sync_playwright() as p:
     browser = p.chromium.launch(headless=False)
     ctx = browser.new_context(accept_downloads=True)
@@ -35,7 +37,7 @@ with sync_playwright() as p:
     # Student Center -> Academics -> View Unofficial Transcript
     page.get_by_role("link", name="Student Center").click()
     page.get_by_role("link", name="Graduation and Transcript").click()
-    page.get_by_role("link", name="John Jay College of Criminal").click()
+    page.get_by_role("link", name=college).click()
 
     # Submit transcript request triggers new window popup
     with page.expect_popup() as page1_info:
@@ -43,14 +45,7 @@ with sync_playwright() as p:
     page1 = page1_info.value
     page1.wait_for_load_state()
 
-    # DEBUG HERE
-    # Clicks dowload button
-    with page1.expect_download() as download_info:
-        page1.locator("html > body > iframe").last.content_frame.get_by_role("button", name="Download").click()
+    # Manual download
 
-    # Downlaods pdf
-    download_info.value.save_as(OUT)
-    print(f"Saved to {OUT}")
-
-    ctx.close()
-    browser.close()
+    # ctx.close()
+    # browser.close()
