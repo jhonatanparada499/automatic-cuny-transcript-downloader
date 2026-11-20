@@ -16,3 +16,6 @@ keyring.set_password("cuny", "totp_secret", "YOUR_BASE32_SECRET")
 
 ## Future features
 - Add docker container for app
+
+## References
+- https://www.w3schools.com/python/python_virtualenv.asp  
