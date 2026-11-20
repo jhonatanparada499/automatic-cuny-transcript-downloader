@@ -45,7 +45,7 @@ with sync_playwright() as p:
     page1 = page1_info.value
     page1.wait_for_load_state()
 
-    # Manual download
+    # Implement manual download and naming
 
     # ctx.close()
     # browser.close()
