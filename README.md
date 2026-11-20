@@ -16,6 +16,7 @@ keyring.set_password("cuny", "totp_secret", "YOUR_BASE32_SECRET")
 ```
 
 ## Future features
+- Implement manual downloading of file
 - Add docker container for app
 
 ## References
