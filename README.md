@@ -1,11 +1,15 @@
 # CUNY Transcript Downloader
 
-Python env setup: https://www.w3schools.com/python/python_virtualenv.asp  
+## Quick Start
+### Ubuntu/Debian
+Run following assuming keyring credentials have been setup and an there is an virtual environment called "venv" with the required dependencies.  
+```
+$ bash run_get_transcript.sh
+```
 
 ## Activate Environment
 ```
 # source myvenv/bin/activate
-
 ```
 
 ## Credentials setup
