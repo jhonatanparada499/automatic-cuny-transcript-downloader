@@ -48,6 +48,8 @@ with sync_playwright() as p:
     page1.wait_for_load_state()
 
     # Implement manual download and naming
+    # 3 Shift+Tab presses, then enter,
+    # Or Control + s
 
     # ctx.close()
     # browser.close()
