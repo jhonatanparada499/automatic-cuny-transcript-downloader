@@ -1,8 +1,10 @@
 # get_transcript.py
 
+from playwright.sync_api import sync_playwright
+import pyautogui
+
 import keyring, pyotp, time
 from pathlib import Path
-from playwright.sync_api import sync_playwright
 from datetime import datetime
 
 stamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -22,9 +24,9 @@ with sync_playwright() as p:
 
     # --- Login (only runs if the session expired) ---
     if page.locator("input[autocomplete=username]").count():
-        page.get_by_role("textbox", name="CUNY Login").fill(user)   # user
-        page.get_by_role("textbox", name="Password").fill(pw)       # password
-        page.get_by_role("button", name="Log in").click()           # submit
+        page.get_by_role("textbox", name="CUNY Login").fill(user)  # user
+        page.get_by_role("textbox", name="Password").fill(pw)  # password
+        page.get_by_role("button", name="Log in").click()  # submit
 
         # avoid submitting a code that's about to expire
         if totp.interval - (time.time() % totp.interval) < 3:
